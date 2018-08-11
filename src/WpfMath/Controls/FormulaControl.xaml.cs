@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.IO;
 using System.Windows.Media;
 using WpfMath.Boxes;
 using WpfMath.Exceptions;
@@ -17,6 +18,7 @@ namespace WpfMath.Controls
     {
         private static TexFormulaParser formulaParser = new TexFormulaParser();
         private TexFormula texFormula;
+        private static ErrorLogger errorlogger=new ErrorLogger();
 
         public string Formula
         {
@@ -111,6 +113,7 @@ namespace WpfMath.Controls
         public FormulaControl()
         {
             InitializeComponent();
+            errorlogger= new ErrorLogger();
         }
 
         private void Render()
@@ -195,6 +198,10 @@ namespace WpfMath.Controls
         private void SetError(TexException exception)
         {
             Errors.Add(exception);
+            errorlogger.LogError(exception.Message);
+            
+            var execpath=Directory.GetCurrentDirectory();
+            errorlogger.SaveThrownErrors(execpath+"/debug.log");
             HasError = true;
             texFormula = null;
         }
