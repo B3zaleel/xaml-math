@@ -1149,7 +1149,7 @@ namespace WpfMath.Parsers
             TexFormula numeratorFormula = null;
             TexFormula denominatorFormula = null;
 
-            if(fracparamsfound=false|| sb.ToString().EndsWith("/"))
+            if(fracparamsfound==false|| sb.ToString().EndsWith("/"))
                 throw new TexParseException("The current fraction style is invalid");
             
             if (Regex.IsMatch(sb.ToString(), @".+/.+"))
@@ -1171,10 +1171,7 @@ namespace WpfMath.Parsers
                 numeratorFormula = Parse(source.Segment(0, midLength), formula.TextStyle);
                 denominatorFormula = Parse(source.Segment(midLength), formula.TextStyle);
             }
-            if(denominatorFormula==null)
-            {
-                throw new TexParseException("The denominator cannot be null");
-            }
+            
             return new FractionAtom(source, numeratorFormula.RootAtom, denominatorFormula.RootAtom, true);
         }
   
@@ -1231,6 +1228,7 @@ namespace WpfMath.Parsers
                 }
             return helpStr;
         }
+        
         private void ProcessEscapeSequence(
             TexFormula formula,
             SourceSpan value,
