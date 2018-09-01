@@ -1105,6 +1105,8 @@ namespace WpfMath.Parsers
       
         private Atom GetSimpleFractionAtom(TexFormula formula,SourceSpan value,ref int position)
         {
+            if(value[position]==escapeChar||value [position]=='/')
+                throw new TexParseException("Escape characters must be put in groups and fractions can't begin with a forward slash");
             SourceSpan source;
             bool fracparamsfound = false;
             StringBuilder sb = new StringBuilder();
@@ -1112,13 +1114,22 @@ namespace WpfMath.Parsers
             while (position < value.Length && fracparamsfound == false && value[position] != escapeChar)
             {
                 string curChar = value[position].ToString();
+                string prevChar = position>0? value[position-1].ToString():value[position].ToString() ;
                 if (curChar == "{")
                 {
-                    var groupsource = value.Segment(position, value.Length - position);
-                    var denomgroup = ReadGroup(groupsource.ToString(), leftGroupChar, rightGroupChar, 0);
-                    sb.Append("{" + denomgroup + "}");
-                    position += denomgroup.Length + 2;
-                    fracparamsfound = true;
+                    if(prevChar!="/")
+                    {
+                        var groupsource = value.Segment(position, value.Length - position);
+                        var denomgroup = ReadGroup(groupsource.ToString(), leftGroupChar, rightGroupChar, 0);
+                        sb.Append("{" + denomgroup + "}");
+                        position += denomgroup.Length + 2;
+                        fracparamsfound = true;
+                    }
+                    else
+                    {
+                        throw new TexParseException("Invalid fraction style");
+                    }
+                    
                 }
                 else if (curChar == " ")
                 {
@@ -1138,7 +1149,7 @@ namespace WpfMath.Parsers
             TexFormula numeratorFormula = null;
             TexFormula denominatorFormula = null;
 
-            if(fracparamsfound=false)
+            if(fracparamsfound=false|| sb.ToString().EndsWith("/"))
                 throw new TexParseException("The current fraction style is invalid");
             
             if (Regex.IsMatch(sb.ToString(), @".+/.+"))
@@ -1147,14 +1158,14 @@ namespace WpfMath.Parsers
                 numeratorFormula = Parse(source.Segment(0, midLength), formula.TextStyle);
                 denominatorFormula = Parse(source.Segment(midLength + 1, source.ToString().Substring(midLength).Length), formula.TextStyle);
             }
-            if (Regex.IsMatch(sb.ToString(), @"[.]+[{][.]+[}]") || sb.ToString().Contains("{") == true)
+            else if (Regex.IsMatch(sb.ToString(), @"[.]+[{][.]+[}]") || sb.ToString().Contains("{") == true)
             {
                 midLength = sb.ToString().Split('{')[0].Length;
                 numeratorFormula = Parse(source.Segment(0, midLength), formula.TextStyle);
                 denominatorFormula = Parse(source.Segment(midLength), formula.TextStyle);
             }
 
-            if (sb.ToString().Contains("/") == false && sb.ToString().Contains("{") == false && sb.ToString().Contains("}") == false)
+            else if (sb.ToString().Contains("/") == false && sb.ToString().Contains("{") == false && sb.ToString().Contains("}") == false)
             {
                 midLength = ((int)Math.Floor((double)(source.Length / 2)));
                 numeratorFormula = Parse(source.Segment(0, midLength), formula.TextStyle);
