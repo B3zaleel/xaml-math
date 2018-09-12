@@ -16,9 +16,14 @@ namespace WpfMath
         internal static readonly IList<string> defaultTextStyleMappings;
         private static readonly IList<TexFontInfo> fontInfoList;
 
-        static DefaultTexFont()
+        public DefaultTexFont():this("WpfMath.Data.DefaultTexFont.xml", "Fonts/Default/", 4,true)
         {
-            var parser = new DefaultTexFontParser();
+        }
+
+        public DefaultTexFont(string fontdescrdir,string fontsDir,int fontsCount,bool isInternal)
+        {
+            
+            var parser = new InternalMathFontParser(fontdescrdir,fontsDir,fontsCount,isInternal);
             parameters = parser.GetParameters();
             generalSettings = parser.GetGeneralSettings();
             textStyleMappings = parser.GetTextStyleMappings();
@@ -120,11 +125,11 @@ namespace WpfMath
             TexCharKind GetCharKind()
             {
                 if (character >= '0' && character <= '9')
-                    return TexCharKind.Numbers;
+                    return TexCharKind.Digit;
                 else if (character >= 'a' && character <= 'z')
-                    return TexCharKind.Small;
+                    return TexCharKind.EnglishSmall;
                 else
-                    return TexCharKind.Capitals;
+                    return TexCharKind.EnglishCapital;
             }
 
             return defaultTextStyleMappings[(int)GetCharKind()];
@@ -139,17 +144,17 @@ namespace WpfMath
             int charIndexOffset;
             if (char.IsDigit(character))
             {
-                charKind = TexCharKind.Numbers;
+                charKind = TexCharKind.Digit;
                 charIndexOffset = character - '0';
             }
             else if (char.IsLetter(character) && char.IsLower(character))
             {
-                charKind = TexCharKind.Small;
+                charKind = TexCharKind.EnglishSmall;
                 charIndexOffset = character - 'a';
             }
             else
             {
-                charKind = TexCharKind.Capitals;
+                charKind = TexCharKind.EnglishCapital;
                 charIndexOffset = character - 'A';
             }
 
@@ -352,8 +357,8 @@ namespace WpfMath
     internal enum TexCharKind
     {
         None = -1,
-        Numbers = 0,
-        Capitals = 1,
-        Small = 2
+        Digit = 0,
+        EnglishCapital = 1,
+        EnglishSmall = 2
     }
 }
