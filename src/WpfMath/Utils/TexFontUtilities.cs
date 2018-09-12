@@ -15,6 +15,8 @@ namespace WpfMath.Utils
         public const int ExtensionMiddle = 1;
         public const int ExtensionRepeat = 2;
         public const int ExtensionBottom = 3;
+        public const int ExtensionLeft = 4;
+        public const int ExtensionRight = 5;
 
         public const int MetricsWidth = 0;
         public const int MetricsHeight = 1;
