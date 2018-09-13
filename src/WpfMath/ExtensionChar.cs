@@ -5,15 +5,19 @@ using System.Text;
 
 namespace WpfMath
 {
-    // Extension character that contains character information for each of its parts.
+    /// <summary>
+    /// Extension character that contains character information for each of its parts.
+    /// </summary>
     internal class ExtensionChar
     {
-        public ExtensionChar(CharInfo top, CharInfo middle, CharInfo bottom, CharInfo repeat)
+        public ExtensionChar(CharInfo top, CharInfo middle, CharInfo bottom, CharInfo repeat, CharInfo left = null, CharInfo right = null)
         {
             this.Top = top;
             this.Middle = middle;
             this.Repeat = repeat;
             this.Bottom = bottom;
+            this.Left = left;
+            this.Right = right;
         }
 
         public CharInfo Top
@@ -39,5 +43,10 @@ namespace WpfMath
             get;
             private set;
         }
+        
+        public CharInfo Left { get; private set; }
+
+        public CharInfo Right { get; private set; }
+        
     }
 }

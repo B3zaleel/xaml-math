@@ -10,31 +10,13 @@ namespace WpfMath.Example
 {
     public partial class MainWindow : Window
     {
-        private TexFormulaParser formulaParser;
 
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private TexFormula ParseFormula(string input)
-        {
-            // Create formula object from input text.
-            TexFormula formula = null;
-            try
-            {
-                formula = this.formulaParser.Parse(input);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred while parsing the given input:" + Environment.NewLine +
-                    Environment.NewLine + ex.Message, "WPF-Math Example", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            return formula;
-        }
-
-        private void saveButton_Click(object sender, RoutedEventArgs e)
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             // Choose file
             SaveFileDialog saveFileDialog = new SaveFileDialog()
@@ -44,52 +26,43 @@ namespace WpfMath.Example
             var result = saveFileDialog.ShowDialog();
             if (result == false) return;
 
-            // Create formula object from input text.
-            var formula = ParseFormula(inputTextBox.Text);
-            if (formula == null) return;
-            var renderer = formula.GetRenderer(TexStyle.Display, this.formula.Scale, "Arial");
-
             // Open stream
             var filename = saveFileDialog.FileName;
-            using (var stream = new FileStream(filename, FileMode.Create))
+            switch (saveFileDialog.FilterIndex)
             {
-                switch (saveFileDialog.FilterIndex)
-                {
-                    case 1:
-                        var geometry = renderer.RenderToGeometry(0, 0);
-                        var converter = new SVGConverter();
-                        var svgPathText = converter.ConvertGeometry(geometry);
-                        var svgText = AddSVGHeader(svgPathText);
-                        using (var writer = new StreamWriter(stream))
-                            writer.WriteLine(svgText);
-                        break;
+                case 1:
+                    var svgConv = new SVGConverter(formula.FormulaSettingsFile, formula.Formula, formula.Scale)
+                    {
+                        SystemTextFontName = formula.SystemTextFontName
+                    };
+                    svgConv.SaveGeometry(filename);
+                    break;
 
-                    case 2:
+                case 2:
+                    using (var stream = new FileStream(filename, FileMode.Create))
+                    {
+                        TexFormulaParser formulaParser = new TexFormulaParser();
+                        formulaParser.LoadSettings(formula.FormulaSettingsFile);
+                        var texFormula = formulaParser.Parse(formula.Formula);
+                        var renderer = texFormula.GetRenderer(TexStyle.Display, formula.Scale, formula.SystemTextFontName);
+
                         var bitmap = renderer.RenderToBitmap(0, 0);
                         var encoder = new PngBitmapEncoder
                         {
                             Frames = { BitmapFrame.Create(bitmap) }
                         };
                         encoder.Save(stream);
-                        break;
+                    }
+                    
+                    break;
 
-                    default:
-                        return;
-                }
+                default:
+                    return;
             }
+            
         }
-
-        private string AddSVGHeader(string svgText)
-        {
-            var builder = new StringBuilder();
-            builder.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
-                .AppendLine("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" >")
-                .AppendLine(svgText)
-                .AppendLine("</svg>");
-
-            return builder.ToString();
-        }
-
+        
+        
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.formulaParser = new TexFormulaParser();

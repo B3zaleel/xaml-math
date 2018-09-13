@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WpfMath.Exceptions;
 
 namespace WpfMath.Utils
 {
@@ -15,6 +16,8 @@ namespace WpfMath.Utils
         public const int ExtensionMiddle = 1;
         public const int ExtensionRepeat = 2;
         public const int ExtensionBottom = 3;
+        public const int ExtensionLeft = 4;
+        public const int ExtensionRight = 5;
 
         public const int MetricsWidth = 0;
         public const int MetricsHeight = 1;
@@ -62,6 +65,47 @@ namespace WpfMath.Utils
             {"mathsfit","mitsans" },
             {"mathtt","mtt" },
         };
+        
+        /// <summary>
+        /// Returns the true representation of an alphanumeric character as a string based on the English Latin alphabets
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        public static string GetCharacterasString(char character)
+        {
+            if (char.IsNumber(character))
+            {
+                switch (character)
+                {
+                    case '0':
+                        return "zero";
+                    case '1':
+                        return "one";
+                    case '2':
+                        return "two";
+                    case '3':
+                        return "three";
+                    case '4':
+                        return "four";
+                    case '5':
+                        return "five";
+                    case '6':
+                        return "six";
+                    case '7':
+                        return "seven";
+                    case '8':
+                        return "eight";
+                    case '9':
+                        return "nine";
+                    default:
+                        throw new TexParseException($"{character} is an unknown number.");
+                }
+            }
+            else
+            {
+                return character.ToString();
+            }
+        }
         
     }
 }
